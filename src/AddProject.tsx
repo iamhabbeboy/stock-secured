@@ -7,10 +7,13 @@ import {
   Flex,
   Input,
   TextInput,
+  UnstyledButton,
   useCombobox,
 } from "@mantine/core";
 import { HeaderSearch } from "./components/Header/HeaderSearch";
 import { useState } from "react";
+import { Product } from "./utils/types";
+import { db } from "./utils/database";
 
 export default function AddProject() {
   const combobox = useCombobox({
@@ -18,6 +21,36 @@ export default function AddProject() {
   });
 
   const [value, setValue] = useState<string>("");
+  const [name, setName] = useState("");
+  const [brand, setBrand] = useState("");
+  const [type, setType] = useState("");
+  const [unit, setUnit] = useState("");
+  const [category, setCategory] = useState("");
+  const [sub, setSub] = useState("");
+  const [sku, setSku] = useState("");
+  const [stock, setStock] = useState("");
+  const [purchasePrice, setPurchasePrice] = useState(0);
+  const [profitPercent, setProfitPercent] = useState(0);
+  const [sellingPrice, setSellingPrice] = useState(0);
+  const [taxType, setTaxType] = useState("");
+
+  const handleStoreProduct = async () => {
+    const payload: Product = {
+      name: name,
+      brand: brand,
+      type: type,
+      unit: unit,
+      category: category,
+      subCategory: sub,
+      sku: sku,
+      currentStock: stock,
+      purchasedPrice: purchasePrice,
+      profitPercent: profitPercent,
+      defaultSellingPrice: sellingPrice,
+    };
+    const resp = await db.products.add(payload);
+    console.log(resp);
+  };
   return (
     <>
       <HeaderSearch />
@@ -33,13 +66,22 @@ export default function AddProject() {
           <Flex justify={"space-between"} py={10}>
             <div className="w-6/12 bg-red-500" style={{ width: "45%" }}>
               <Input.Wrapper label="Product Name" w={"100%"} size="lg">
-                <Input placeholder="Product name" size="lg" />
+                <Input
+                  placeholder="Product name"
+                  size="lg"
+                  onChange={(e) => setName(e.target.value)}
+                />
               </Input.Wrapper>
             </div>
-            <div style={{ width: "45%" }}>
-              <Input.Wrapper label="SKU" w={"100%"}>
-                <Input placeholder="SKU" size="lg" />
-              </Input.Wrapper>
+            <div className="w-6/12 bg-red-500" style={{ width: "45%" }}>
+              <Autocomplete
+                label="Brand"
+                w={"100%"}
+                size="lg"
+                placeholder="Type or select product type"
+                data={["React"]}
+                onChange={(value) => setBrand(value)}
+              />
             </div>
           </Flex>
           <Flex justify={"space-between"} py={10}>
@@ -50,6 +92,7 @@ export default function AddProject() {
                 size="lg"
                 placeholder="Type or select product type"
                 data={["React", "Angular", "Vue", "Svelte"]}
+                onChange={(value) => setType(value)}
               />
             </div>
             <div style={{ width: "45%" }}>
@@ -58,7 +101,8 @@ export default function AddProject() {
                 w={"100%"}
                 size="lg"
                 placeholder="Type or select unit"
-                data={["React", "Angular", "Vue", "Svelte"]}
+                data={["Pcs"]}
+                onChange={(value) => setUnit(value)}
               />
             </div>
           </Flex>
@@ -70,6 +114,7 @@ export default function AddProject() {
                 size="lg"
                 placeholder="Type or select product type"
                 data={["React", "Angular", "Vue", "Svelte"]}
+                onChange={(value) => setCategory(value)}
               />
             </div>
             <div style={{ width: "45%" }}>
@@ -79,22 +124,27 @@ export default function AddProject() {
                 size="lg"
                 placeholder="Type or select unit"
                 data={["React", "Angular", "Vue", "Svelte"]}
+                onChange={(value) => setSub(value)}
               />
             </div>
           </Flex>
           <Flex justify={"space-between"} py={10}>
-            <div className="w-6/12 bg-red-500" style={{ width: "45%" }}>
-              <Autocomplete
-                label="Brand"
-                w={"100%"}
-                size="lg"
-                placeholder="Type or select product type"
-                data={["React", "Angular", "Vue", "Svelte"]}
-              />
+            <div style={{ width: "45%" }}>
+              <Input.Wrapper label="SKU" w={"100%"}>
+                <Input
+                  placeholder="SKU"
+                  size="lg"
+                  onChange={(evt) => setSku(evt.target.value)}
+                />
+              </Input.Wrapper>
             </div>
             <div style={{ width: "45%" }}>
               <Input.Wrapper label="Current Stock" w={"100%"} size="lg">
-                <Input placeholder="Quantity" size="lg" />
+                <Input
+                  placeholder="Quantity"
+                  size="lg"
+                  onChange={(evt) => setStock(evt.target.value)}
+                />
               </Input.Wrapper>
             </div>
           </Flex>
@@ -111,12 +161,12 @@ export default function AddProject() {
             >
               <Combobox.Target>
                 <TextInput
-                  label="Pick value or type anything"
-                  placeholder="Pick value or type anything"
-                  value={value}
+                  label="Tax type"
+                  placeholder="Select tax type"
+                  value={taxType}
                   size="lg"
                   onChange={(event) => {
-                    setValue(event.currentTarget.value);
+                    setTaxType(event.currentTarget.value);
                     combobox.openDropdown();
                     combobox.updateSelectedOptionIndex();
                   }}
@@ -138,25 +188,42 @@ export default function AddProject() {
             style={{ width: "45%", marginTop: "15px", marginBottom: "15px" }}
           >
             <Input.Wrapper label="Purchase Price" w={"100%"} size="lg">
-              <Input placeholder="" size="lg" defaultValue={10} />
+              <Input
+                placeholder=""
+                size="lg"
+                type="number"
+                defaultValue={10}
+                onChange={(evt) => setPurchasePrice(Number(evt.target.value))}
+              />
             </Input.Wrapper>
           </div>
           <div
             style={{ width: "45%", marginTop: "15px", marginBottom: "15px" }}
           >
             <Input.Wrapper label="Profit Percent" w={"100%"} size="lg">
-              <Input placeholder="" size="lg" defaultValue={0} />
+              <Input
+                placeholder=""
+                size="lg"
+                defaultValue={0}
+                type="number"
+                onChange={(evt) => setProfitPercent(Number(evt.target.value))}
+              />
             </Input.Wrapper>
           </div>
           <div
             style={{ width: "45%", marginTop: "15px", marginBottom: "15px" }}
           >
             <Input.Wrapper label="Default Selling Price" w={"100%"} size="lg">
-              <Input placeholder="" size="lg" defaultValue={0} />
+              <Input
+                placeholder=""
+                size="lg"
+                defaultValue={0}
+                onChange={(evt) => setSellingPrice(Number(evt.target.value))}
+              />
             </Input.Wrapper>
           </div>
 
-          <Button> Save &amp; Add Stock </Button>
+          <Button onClick={handleStoreProduct}> Save &amp; Add Stock </Button>
           <br />
           <br />
         </form>
